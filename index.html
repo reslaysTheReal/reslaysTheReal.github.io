@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matrix</title>
+    <title>Searcher - Le meilleur moteur français</title>
     <style>
         * {
             margin: 0;
@@ -14,50 +14,336 @@
         body {
             width: 100%;
             height: 100vh;
-            background: #000;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             overflow: hidden;
-            font-family: 'Courier New', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            color: #fff;
         }
 
-        /* Canvas pour le fond Matrix */
-        #matrixCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1;
-        }
-
-        /* Container pour les particules */
-        .particles-container {
+        /* Animated background particles */
+        .bg-particles {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
+            z-index: 0;
+            overflow: hidden;
         }
 
         .particle {
             position: absolute;
-            font-size: 14px;
-            color: #00ff00;
-            font-weight: bold;
-            text-shadow: 0 0 10px #00ff00;
-            opacity: 1;
-            pointer-events: none;
+            width: 2px;
+            height: 2px;
+            background: rgba(147, 51, 234, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
         }
 
-        /* Barre de texte d'entrée au centre */
-        .text-bar {
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Main container */
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        /* Navigation */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #9333ea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #9333ea;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-discord {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-discord:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(147, 51, 234, 0.3);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: rgba(147, 51, 234, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .tagline {
+            display: inline-block;
+            background: rgba(147, 51, 234, 0.1);
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            color: #c4b5fd;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .highlight {
+            color: #9333ea;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description {
+            color: #a0a0a0;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 30px auto;
+            line-height: 1.6;
+        }
+
+        /* Search buttons */
+        .search-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 40px 0;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(147, 51, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(50, 50, 50, 0.5);
+            color: white;
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(147, 51, 234, 0.1);
+            border-color: rgba(147, 51, 234, 0.5);
+        }
+
+        /* Search filters */
+        .search-filters {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(50, 50, 50, 0.3);
+            color: #a0a0a0;
+            border: 1px solid rgba(147, 51, 234, 0.2);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(147, 51, 234, 0.1);
+            border-color: rgba(147, 51, 234, 0.5);
+            color: #9333ea;
+        }
+
+        /* Stats section */
+        .stats-container {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            margin: 60px 0;
+            padding: 30px;
+            background: rgba(50, 50, 50, 0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(147, 51, 234, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #9333ea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #707070;
+            font-size: 14px;
+        }
+
+        /* Features section */
+        .features {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 60px;
+        }
+
+        .feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #9333ea;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .feature-text {
+            color: #707070;
+            font-size: 14px;
+            max-width: 150px;
+        }
+
+        /* Input bar styling */
+        .input-bar {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .text-bar {
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -69,106 +355,155 @@
         }
 
         .text-bar-content {
-            background: rgba(0, 255, 0, 0.1);
-            border: 2px solid #00ff00;
-            padding: 20px 40px;
-            color: #00ff00;
-            font-size: 18px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px #00ff00;
-            letter-spacing: 2px;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.2);
-            animation: scan 3s linear infinite;
+            background: rgba(20, 20, 30, 0.95);
+            border: 2px solid #9333ea;
+            padding: 20px 30px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            box-shadow: 0 20px 60px rgba(147, 51, 234, 0.3);
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .text-bar-input {
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            font-size: 16px;
-            font-family: 'Courier New', monospace;
-            padding: 10px 15px;
-            outline: none;
-            text-shadow: 0 0 5px #00ff00;
-            min-width: 300px;
-            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
-        }
-
-        .text-bar-input::placeholder {
-            color: rgba(0, 255, 0, 0.5);
-        }
-
-        .text-bar-input:focus {
-            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.3), 0 0 10px rgba(0, 255, 0, 0.5);
+            gap: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .text-bar-prompt {
+            color: #9333ea;
             white-space: nowrap;
         }
 
-        @keyframes scan {
-            0%, 100% {
-                text-shadow: 0 0 10px #00ff00, 0 0 20px rgba(0, 255, 0, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 20px #00ff00, 0 0 30px rgba(0, 255, 0, 0.8);
-            }
+        .text-bar-input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            outline: none;
+            min-width: 300px;
         }
 
-        .text-bar-content {
-            animation: scan 3s linear infinite, flicker 0.15s ease-in-out infinite;
-        }
-
-        @keyframes flicker {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-        .cursor-blink {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 49% {
-                opacity: 1;
-            }
-            50%, 100% {
-                opacity: 0;
-            }
+        .text-bar-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .status-message {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #00ff00;
+            top: 30px;
+            right: 30px;
+            color: #9333ea;
             font-size: 14px;
-            text-shadow: 0 0 10px #00ff00;
             z-index: 5;
             transition: opacity 0.3s ease;
+            background: rgba(20, 20, 30, 0.95);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(147, 51, 234, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .status-message.hidden {
             opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <canvas id="matrixCanvas"></canvas>
-    <div class="particles-container" id="particlesContainer"></div>
-    
-    <div class="text-bar" id="textBar">
-        <div class="text-bar-content">
-            <span class="text-bar-prompt">> </span>
-            <input type="text" class="text-bar-input" id="userInput" placeholder="ENTRER LA COMMANDE..." autocomplete="off">
-            <span class="cursor-blink">_</span>
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="logo">
+                <span style="color: #9333ea;">🔮</span>
+                Searcher
+            </div>
+            <ul class="nav-links">
+                <li><a>Accueil</a></li>
+                <li><a>Recherche</a></li>
+                <li><a>Tarifs</a></li>
+                <li><a>Tuto</a></li>
+                <li><a>Contact</a></li>
+                <li><a>Support</a></li>
+            </ul>
+            <div class="nav-right">
+                <span style="color: #9333ea;">129 🌙</span>
+                <button class="btn-discord">💬 Discord</button>
+                <a style="color: #a0a0a0; text-decoration: none; cursor: pointer;">📱 Telegram</a>
+                <div class="user-profile">
+                    <div class="user-avatar">R</div>
+                    <span>reslays</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="tagline">✨ +5,8 milliards d'enregistrements indexés</div>
+
+            <h1>Le meilleur moteur français<br><span class="highlight">de recherche</span></h1>
+
+            <p class="description">
+                Recherchez dans des sources ouvertes et des données publiquement accessibles. De l'email au numéro de téléphone, utilisez plus de 25 critères pour la vérification, la conformité et la cybersécurité défensive.
+            </p>
+
+            <div class="search-buttons">
+                <button class="btn-primary">🔍 Commencer une recherche</button>
+                <button class="btn-secondary">Voir les tarifs <span style="color: #00ff00;">Dès 7€</span></button>
+            </div>
+
+            <div class="search-filters">
+                <div class="filter-btn">📧 Email</div>
+                <div class="filter-btn">☎️ Téléphone</div>
+                <div class="filter-btn">📍 Adresse</div>
+                <div class="filter-btn">🏙️ Ville</div>
+                <div class="filter-btn">📬 Code postal</div>
+                <div class="filter-btn">🌐 Adresse IP</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat">
+                    <div class="stat-value">5.8B+</div>
+                    <div class="stat-label">DONNÉES</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">25+</div>
+                    <div class="stat-label">CRITÈRES</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value"><1s</div>
+                    <div class="stat-label">RÉSULTATS</div>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-title">Données sécurisées</div>
+                    <div class="feature-text">Vos recherches sont protégées</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Résultats instantanés</div>
+                    <div class="feature-text">Obtenir les résultats rapidement</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-title">+25 critères de recherche</div>
+                    <div class="feature-text">Plus de paramètres</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+        <div class="text-bar" id="textBar">
+            <div class="text-bar-content">
+                <span class="text-bar-prompt">> </span>
+                <input type="text" class="text-bar-input" id="userInput" placeholder="ENTRER LE MESSAGE..." autocomplete="off">
+            </div>
         </div>
     </div>
 
@@ -178,70 +513,31 @@
         // Discord Webhook URL
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1512483780990996510/M32pQZDO3_rDZ6_lY_lJDJB-wV6XTzKDqvHCWDWaJClelP8y79wqmgpLGJ09DtPMASMK';
 
-        // Canvas Matrix Background
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const drops = Array(Math.floor(columns)).fill(0);
-
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#00ff00';
-            ctx.font = `${fontSize}px 'Courier New'`;
-            ctx.shadowColor = '#00ff00';
-            ctx.shadowBlur = 5;
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
+        // Generate particles background
+        function generateParticles() {
+            const container = document.getElementById('bgParticles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 20) + 's';
+                particle.style.width = (Math.random() * 3 + 1) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
             }
         }
 
-        function animateMatrix() {
-            drawMatrix();
-            requestAnimationFrame(animateMatrix);
-        }
+        generateParticles();
 
-        // Redimensionner le canvas
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-        // Particules au mouvement du curseur
-        let mouseX = 0;
-        let mouseY = 0;
-        const particlesContainer = document.getElementById('particlesContainer');
-        const hackerChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        // Input bar logic
         const userInput = document.getElementById('userInput');
         const textBar = document.getElementById('textBar');
         const statusMessage = document.getElementById('statusMessage');
 
         document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-
-            // Créer des particules
-            for (let i = 0; i < 3; i++) {
-                createParticle(mouseX, mouseY);
-            }
-
-            // Afficher la barre de texte
             textBar.classList.add('active');
-
             clearTimeout(textBar.hideTimeout);
             textBar.hideTimeout = setTimeout(() => {
                 if (!userInput.value && document.activeElement !== userInput) {
@@ -250,42 +546,6 @@
             }, 3000);
         });
 
-        function createParticle(x, y) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.textContent = hackerChars[Math.floor(Math.random() * hackerChars.length)];
-
-            const offsetX = (Math.random() - 0.5) * 100;
-            const offsetY = (Math.random() - 0.5) * 100;
-
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-
-            particlesContainer.appendChild(particle);
-
-            // Animation
-            let lifetime = 1000;
-            let opacity = 1;
-
-            const animate = () => {
-                lifetime -= 16;
-                opacity = lifetime / 1000;
-
-                particle.style.opacity = opacity;
-                particle.style.left = (x + offsetX * (1 - opacity / 1)) + 'px';
-                particle.style.top = (y + offsetY * (1 - opacity / 1)) + 'px';
-
-                if (lifetime > 0) {
-                    requestAnimationFrame(animate);
-                } else {
-                    particle.remove();
-                }
-            };
-
-            animate();
-        }
-
-        // Fonction pour montrer les messages de statut
         function showStatus(message, duration = 3000) {
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden');
@@ -294,7 +554,7 @@
             }, duration);
         }
 
-        // Envoi du message au webhook Discord
+        // Discord webhook integration
         userInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter' && userInput.value.trim()) {
                 const message = userInput.value.trim();
@@ -302,7 +562,7 @@
                 userInput.disabled = true;
 
                 try {
-                    showStatus('> ENVOI DU MESSAGE...');
+                    showStatus('📤 ENVOI DU MESSAGE...');
 
                     const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
@@ -311,19 +571,19 @@
                         },
                         body: JSON.stringify({
                             content: message,
-                            username: 'Matrix User',
-                            avatar_url: 'https://images.emojiterra.com/twitter/v14.0/128px/1f3a5.png'
+                            username: 'Searcher User',
+                            avatar_url: 'https://images.emojiterra.com/twitter/v14.0/128px/1f50e.png'
                         })
                     });
 
                     if (response.ok) {
-                        showStatus('> MESSAGE ENVOYÉ AVEC SUCCÈS ✓');
+                        showStatus('✅ MESSAGE ENVOYÉ AVEC SUCCÈS');
                     } else {
-                        showStatus('> ERREUR LORS DE L\'ENVOI ✗');
+                        showStatus('❌ ERREUR LORS DE L\'ENVOI');
                     }
                 } catch (error) {
                     console.error('Erreur:', error);
-                    showStatus('> ERREUR DE CONNEXION ✗');
+                    showStatus('❌ ERREUR DE CONNEXION');
                 } finally {
                     userInput.disabled = false;
                     userInput.focus();
@@ -331,7 +591,6 @@
             }
         });
 
-        // Garder la barre visible quand l'input est focalisé
         userInput.addEventListener('focus', () => {
             textBar.classList.add('active');
             clearTimeout(textBar.hideTimeout);
@@ -345,9 +604,6 @@
                 }, 1000);
             }
         });
-
-        // Démarrer l'animation
-        animateMatrix();
     </script>
 </body>
 </html>
