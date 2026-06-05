@@ -2,10 +2,91 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon super site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Interactive</title>
+    <style>
+        /* Réinitialisation et centrage complet */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Arrière-plan par défaut */
+            background: radial-gradient(circle at 50% 50%, #3a1c71, #d76d77, #ffaf7b);
+            transition: background 0.1s ease;
+        }
+
+        /* Conteneur central pour la barre de texte */
+        .container {
+            text-align: center;
+            z-index: 10;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Style de la barre de texte */
+        .search-bar {
+            width: 100%;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Effet au survol et focus de la barre de texte */
+        .search-bar:focus {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(215, 109, 119, 0.5);
+            transform: scale(1.02);
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenue sur mon site hébergé avec GitHub !</h1>
-    <p>Ce site a été créé super rapidement.</p>
+
+    <div class="container">
+        <h1>Bougez votre souris !</h1>
+        <input type="text" class="search-bar" placeholder="Écrivez quelque chose ici...">
+    </div>
+
+    <script>
+        // Écoute le mouvement de la souris sur toute la page
+        document.addEventListener('mousemove', (e) => {
+            // Récupère la position du curseur en pourcentage de l'écran
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            
+            // Modifie dynamiquement le centre du dégradé en fonction du curseur
+            document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #4e54c8, #8f94fb, #22c1c3)`;
+        });
+    </script>
+
 </body>
 </html>
