@@ -51,7 +51,7 @@
             pointer-events: none;
         }
 
-        /* Barre de texte animée au centre */
+        /* Barre de texte d'entrée au centre */
         .text-bar {
             position: fixed;
             top: 50%;
@@ -65,6 +65,7 @@
 
         .text-bar.active {
             opacity: 1;
+            pointer-events: all;
         }
 
         .text-bar-content {
@@ -76,9 +77,36 @@
             font-family: 'Courier New', monospace;
             text-shadow: 0 0 10px #00ff00;
             letter-spacing: 2px;
-            white-space: nowrap;
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.2);
             animation: scan 3s linear infinite;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .text-bar-input {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            padding: 10px 15px;
+            outline: none;
+            text-shadow: 0 0 5px #00ff00;
+            min-width: 300px;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .text-bar-input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        .text-bar-input:focus {
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.3), 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .text-bar-prompt {
+            white-space: nowrap;
         }
 
         @keyframes scan {
@@ -90,6 +118,10 @@
             }
         }
 
+        .text-bar-content {
+            animation: scan 3s linear infinite, flicker 0.15s ease-in-out infinite;
+        }
+
         @keyframes flicker {
             0%, 100% {
                 opacity: 1;
@@ -99,8 +131,32 @@
             }
         }
 
-        .text-bar-content {
-            animation: scan 3s linear infinite, flicker 0.15s ease-in-out infinite;
+        .cursor-blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% {
+                opacity: 1;
+            }
+            50%, 100% {
+                opacity: 0;
+            }
+        }
+
+        .status-message {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 10px #00ff00;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-message.hidden {
+            opacity: 0;
         }
     </style>
 </head>
@@ -109,12 +165,19 @@
     <div class="particles-container" id="particlesContainer"></div>
     
     <div class="text-bar" id="textBar">
-        <div class="text-bar-content" id="textBarContent">
-            > ACCESSING SYSTEM... _
+        <div class="text-bar-content">
+            <span class="text-bar-prompt">> </span>
+            <input type="text" class="text-bar-input" id="userInput" placeholder="ENTRER LA COMMANDE..." autocomplete="off">
+            <span class="cursor-blink">_</span>
         </div>
     </div>
 
+    <div class="status-message hidden" id="statusMessage"></div>
+
     <script>
+        // Discord Webhook URL
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1512483780990996510/M32pQZDO3_rDZ6_lY_lJDJB-wV6XTzKDqvHCWDWaJClelP8y79wqmgpLGJ09DtPMASMK';
+
         // Canvas Matrix Background
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
@@ -163,6 +226,9 @@
         let mouseY = 0;
         const particlesContainer = document.getElementById('particlesContainer');
         const hackerChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+        const userInput = document.getElementById('userInput');
+        const textBar = document.getElementById('textBar');
+        const statusMessage = document.getElementById('statusMessage');
 
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
@@ -173,14 +239,15 @@
                 createParticle(mouseX, mouseY);
             }
 
-            // Afficher/masquer la barre de texte
-            const textBar = document.getElementById('textBar');
+            // Afficher la barre de texte
             textBar.classList.add('active');
 
             clearTimeout(textBar.hideTimeout);
             textBar.hideTimeout = setTimeout(() => {
-                textBar.classList.remove('active');
-            }, 2000);
+                if (!userInput.value && document.activeElement !== userInput) {
+                    textBar.classList.remove('active');
+                }
+            }, 3000);
         });
 
         function createParticle(x, y) {
@@ -218,22 +285,64 @@
             animate();
         }
 
-        // Changer le texte de la barre
-        const messages = [
-            '> ACCESSING SYSTEM... _',
-            '> SCANNING NETWORK... _',
-            '> DOWNLOADING DATA... _',
-            '> INITIALIZING PROTOCOL... _',
-            '> BREACH IN PROGRESS... _',
-            '> FIREWALL BYPASSED... _'
-        ];
+        // Fonction pour montrer les messages de statut
+        function showStatus(message, duration = 3000) {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden');
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, duration);
+        }
 
-        let messageIndex = 0;
+        // Envoi du message au webhook Discord
+        userInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter' && userInput.value.trim()) {
+                const message = userInput.value.trim();
+                userInput.value = '';
+                userInput.disabled = true;
 
-        document.addEventListener('mousemove', () => {
-            if (Math.random() > 0.7) {
-                messageIndex = (messageIndex + 1) % messages.length;
-                document.getElementById('textBarContent').textContent = messages[messageIndex];
+                try {
+                    showStatus('> ENVOI DU MESSAGE...');
+
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            content: message,
+                            username: 'Matrix User',
+                            avatar_url: 'https://images.emojiterra.com/twitter/v14.0/128px/1f3a5.png'
+                        })
+                    });
+
+                    if (response.ok) {
+                        showStatus('> MESSAGE ENVOYÉ AVEC SUCCÈS ✓');
+                    } else {
+                        showStatus('> ERREUR LORS DE L\'ENVOI ✗');
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showStatus('> ERREUR DE CONNEXION ✗');
+                } finally {
+                    userInput.disabled = false;
+                    userInput.focus();
+                }
+            }
+        });
+
+        // Garder la barre visible quand l'input est focalisé
+        userInput.addEventListener('focus', () => {
+            textBar.classList.add('active');
+            clearTimeout(textBar.hideTimeout);
+        });
+
+        userInput.addEventListener('blur', () => {
+            if (!userInput.value) {
+                clearTimeout(textBar.hideTimeout);
+                textBar.hideTimeout = setTimeout(() => {
+                    textBar.classList.remove('active');
+                }, 1000);
             }
         });
 
