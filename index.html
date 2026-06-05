@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interface Interactive</title>
+    <title>Interface Matrix Interactive</title>
     <style>
-        /* Réinitialisation et centrage complet */
         * {
             margin: 0;
             padding: 0;
@@ -16,13 +15,21 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            font-family: 'Courier New', Courier, monospace;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Arrière-plan par défaut */
-            background: radial-gradient(circle at 50% 50%, #3a1c71, #d76d77, #ffaf7b);
-            transition: background 0.1s ease;
+        }
+
+        /* Le canvas prend tout l'arrière-plan */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
 
         /* Conteneur central pour la barre de texte */
@@ -33,59 +40,137 @@
             max-width: 500px;
         }
 
-        h1 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 2rem;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Style de la barre de texte */
+        /* Style de la barre de texte version Matrix */
         .search-bar {
             width: 100%;
             padding: 15px 25px;
             font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            color: white;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: 'Courier New', Courier, monospace;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
             outline: none;
             transition: all 0.3s ease;
         }
 
-        /* Effet au survol et focus de la barre de texte */
+        /* Effet de brillance quand on clique sur la barre */
         .search-bar:focus {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(215, 109, 119, 0.5);
-            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+            background: rgba(0, 10, 0, 0.9);
         }
 
         .search-bar::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(0, 255, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
+    <canvas id="matrixCanvas"></canvas>
+
     <div class="container">
-        <h1>Bougez votre souris !</h1>
-        <input type="text" class="search-bar" placeholder="Écrivez quelque chose ici...">
+        <input type="text" class="search-bar" placeholder="Entrez dans la Matrice...">
     </div>
 
     <script>
-        // Écoute le mouvement de la souris sur toute la page
-        document.addEventListener('mousemove', (e) => {
-            // Récupère la position du curseur en pourcentage de l'écran
-            const x = (e.clientX / window.innerWidth) * 100;
-            const y = (e.clientY / window.innerHeight) * 100;
-            
-            // Modifie dynamiquement le centre du dégradé en fonction du curseur
-            document.body.style.background = `radial-gradient(circle at ${x}% ${y}%, #4e54c8, #8f94fb, #22c1c3)`;
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ajuster la taille du canvas à l'écran
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Caractères utilisés pour l'effet Matrix
+        const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ".split("");
+
+        // Configuration de la pluie Matrix de fond
+        const fontSize = 16;
+        const columns = Math.floor(canvas.width / fontSize);
+        const rainDrops = Array(columns).fill(1);
+
+        // Tableau pour stocker les particules générées par la souris
+        const particles = [];
+
+        // Classe pour gérer les particules de la souris
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                // Choisit un caractère au hasard
+                this.char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                this.size = Math.random() * 8 + 14; // Taille entre 14px et 22px
+                this.opacity = 1.0;
+                // Vitesse aléatoire pour que la particule bouge légèrement
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.decay = Math.random() * 0.02 + 0.015; // Vitesse de disparition
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.opacity -= this.decay; // Réduit l'opacité
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(0, 255, 70, ${this.opacity})`;
+                ctx.font = this.size + 'px monospace';
+                ctx.fillText(this.char, this.x, this.y);
+            }
+        }
+
+        // Détection des mouvements de la souris pour créer des particules
+        window.addEventListener('mousemove', (e) => {
+            // On crée 2 particules à chaque mouvement pour un effet plus dense
+            particles.push(new Particle(e.clientX, e.clientY));
+            particles.push(new Particle(e.clientX, e.clientY));
         });
+
+        // Boucle d'animation principale
+        function draw() {
+            // Effet d'effacement progressif pour laisser une traînée noire derrière les lettres qui tombent
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Dessiner la pluie Matrix en arrière-plan
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                // Lettre verte standard pour la pluie
+                ctx.fillStyle = '#00FF46';
+                const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                // Recommencer la chute au hasard une fois en bas de l'écran
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+
+            // 2. Dessiner et mettre à jour les particules de la souris
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Supprimer la particule si elle est invisible
+                if (particles[i].opacity <= 0) {
+                    particles[i] = null;
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Lancement de l'animation
+        draw();
     </script>
 
 </body>
