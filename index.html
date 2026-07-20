@@ -12,7 +12,7 @@
         }
 
         html {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><style>.cursor-trail{fill:url(%23grad)}</style><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23667eea;stop-opacity:1" /><stop offset="100%" style="stop-color:%23764ba2;stop-opacity:1" /></linearGradient></defs><circle cx="16" cy="16" r="6" class="cursor-trail" opacity="0.8"/><circle cx="16" cy="16" r="4" fill="white"/></svg>') 16 16, auto;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8" fill="rgba(102,126,234,0.8)"/></svg>') 16 16, auto;
         }
 
         body {
@@ -77,6 +77,11 @@
             50% { background-position: 50px 50px; }
         }
 
+        @keyframes floatingContainer {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
         .container {
             background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(20px) brightness(1.1);
@@ -89,7 +94,9 @@
             position: relative;
             z-index: 1;
             border: 3px solid rgba(255, 255, 255, 0.6);
-            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                      floatingContainer 4s ease-in-out infinite;
+            animation-delay: 0s, 0.8s;
         }
 
         @keyframes slideIn {
@@ -416,18 +423,6 @@
                 font-size: 16px;
             }
         }
-
-        /* Floating animation */
-        @keyframes floatingContainer {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .container {
-            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                      floatingContainer 4s ease-in-out infinite;
-            animation-delay: 0s, 0.8s;
-        }
     </style>
 </head>
 <body>
@@ -448,6 +443,7 @@
                     type="url" 
                     id="webhookUrl" 
                     placeholder="https://discord.com/api/webhooks/..."
+                    required
                 >
             </div>
 
@@ -481,7 +477,7 @@
                     <span class="section-icon">📁</span>
                     <span>Fichiers</span>
                 </div>
-                <label for="fileInput">Sélectionne tes fichiers</label>
+                <label for="fileInput">Sélectionne tes fichiers (max 8MB par fichier)</label>
                 <input 
                     type="file" 
                     id="fileInput" 
@@ -521,8 +517,16 @@
         const status = document.getElementById('status');
         let selectedFiles = [];
 
+        const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB limite Discord
+
         fileInput.addEventListener('change', (e) => {
-            selectedFiles = Array.from(e.target.files);
+            selectedFiles = Array.from(e.target.files).filter(file => {
+                if (file.size > MAX_FILE_SIZE) {
+                    showStatus(`❌ ${file.name} dépasse 8MB`, 'error');
+                    return false;
+                }
+                return true;
+            });
             updateFileList();
         });
 
@@ -552,6 +556,15 @@
             }
         }
 
+        function isValidWebhookUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname === 'discord.com' && url.includes('/api/webhooks/');
+            } catch (e) {
+                return false;
+            }
+        }
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -559,8 +572,8 @@
             const userId = discordId.value.trim();
             const message = messageText.value.trim();
 
-            if (!webhookUrl) {
-                showStatus('⚠️ Veuillez entrer une URL de webhook valide.', 'error');
+            if (!webhookUrl || !isValidWebhookUrl(webhookUrl)) {
+                showStatus('⚠️ Veuillez entrer une URL de webhook Discord valide.', 'error');
                 return;
             }
 
@@ -579,6 +592,7 @@
                     finalMessage = `<@${userId}> ${message}`.trim();
                 }
 
+                // Envoyer le message texte d'abord
                 if (finalMessage !== '') {
                     const response = await fetch(webhookUrl, {
                         method: 'POST',
@@ -591,13 +605,14 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Erreur: ${response.status}`);
+                        throw new Error(`Erreur serveur: ${response.status}`);
                     }
                 }
 
+                // Envoyer les fichiers un par un
                 for (const file of selectedFiles) {
                     const formData = new FormData();
-                    formData.append('file', file, file.name);
+                    formData.append('file', file);
 
                     const response = await fetch(webhookUrl, {
                         method: 'POST',
@@ -605,8 +620,11 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Erreur: ${response.status}`);
+                        throw new Error(`Erreur lors de l'envoi de ${file.name}: ${response.status}`);
                     }
+
+                    // Petit délai entre les fichiers pour éviter les limites de taux
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
 
                 showStatus('✅ Message et fichiers envoyés avec succès!', 'success');
@@ -614,6 +632,7 @@
                 selectedFiles = [];
                 updateFileList();
             } catch (error) {
+                console.error('Erreur:', error);
                 showStatus('❌ Erreur: ' + error.message, 'error');
             } finally {
                 button.disabled = false;
