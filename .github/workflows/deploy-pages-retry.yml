@@ -1,0 +1,66 @@
+name: Deploy Pages (with retries)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build site
+        run: |
+          # ADAPTE : ajoute tes commandes de build ici, par ex :
+          # npm ci
+          # npm run build
+          echo "Ajoute tes commandes de build ici (ex: npm run build)"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # ADAPTE : indique le dossier contenant le site généré (ex: ./public, ./dist, ./build)
+          path: ./public
+
+      - name: Deploy to GitHub Pages (attempt 1)
+        id: deploy1
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before retry #1
+        if: steps.deploy1.outcome != 'success'
+        run: sleep 15
+
+      - name: Deploy to GitHub Pages (attempt 2)
+        id: deploy2
+        if: steps.deploy1.outcome != 'success'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Wait before retry #2
+        if: steps.deploy1.outcome != 'success' && steps.deploy2.outcome != 'success'
+        run: sleep 30
+
+      - name: Deploy to GitHub Pages (final attempt)
+        id: deploy3
+        if: steps.deploy1.outcome != 'success' && steps.deploy2.outcome != 'success'
+        uses: actions/deploy-pages@v5
+
+      - name: Fail if Pages deployment ultimately failed
+        if: steps.deploy1.outcome != 'success' && steps.deploy2.outcome != 'success' && steps.deploy3.outcome != 'success'
+        run: |
+          echo "ERROR: Pages deployment failed after 3 attempts."
+          exit 1
