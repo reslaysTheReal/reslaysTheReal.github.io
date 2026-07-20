@@ -35,7 +35,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Curseur personnalisé avec trail */
         .cursor-glow {
             position: fixed;
             width: 20px;
@@ -54,7 +53,6 @@
             50% { box-shadow: 0 0 30px rgba(118, 75, 162, 1); }
         }
 
-        /* Particles flottantes */
         body::before {
             content: '';
             position: fixed;
@@ -82,23 +80,6 @@
             50% { transform: translateY(-15px); }
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(20px) brightness(1.1);
-            border-radius: 30px;
-            box-shadow: 0 50px 150px rgba(0, 0, 0, 0.3),
-                        0 0 100px rgba(102, 126, 234, 0.2) inset;
-            padding: 60px;
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-            z-index: 1;
-            border: 3px solid rgba(255, 255, 255, 0.6);
-            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                      floatingContainer 4s ease-in-out infinite;
-            animation-delay: 0s, 0.8s;
-        }
-
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -108,6 +89,65 @@
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(20px) brightness(1.1);
+            border-radius: 30px;
+            box-shadow: 0 50px 150px rgba(0, 0, 0, 0.3), 0 0 100px rgba(102, 126, 234, 0.2) inset;
+            padding: 60px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            animation: slideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), floatingContainer 4s ease-in-out infinite;
+            animation-delay: 0s, 0.8s;
         }
 
         h1 {
@@ -124,17 +164,6 @@
             font-weight: 900;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .subtitle {
             color: #666;
             text-align: center;
@@ -142,17 +171,6 @@
             font-size: 16px;
             font-weight: 500;
             animation: fadeInUp 0.8s ease-out 0.1s both;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .form-section {
@@ -221,8 +239,7 @@
             outline: none;
             border-color: #667eea;
             background: white;
-            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.2),
-                        0 15px 35px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.2), 0 15px 35px rgba(102, 126, 234, 0.2);
             transform: translateY(-2px);
         }
 
@@ -230,6 +247,7 @@
             resize: vertical;
             min-height: 90px;
             max-height: 150px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .file-list {
@@ -273,17 +291,6 @@
         .file-item:hover {
             transform: translateX(8px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         .file-item-name {
@@ -372,17 +379,6 @@
             display: none;
             border-left: 5px solid;
             animation: slideDown 0.4s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .status.show {
@@ -493,7 +489,6 @@
     </div>
 
     <script>
-        // Curseur personnalisé
         const cursorGlow = document.getElementById('cursorGlow');
         let mouseX = 0;
         let mouseY = 0;
@@ -505,10 +500,8 @@
             cursorGlow.style.top = (mouseY - 10) + 'px';
         });
 
-        // Cacher le curseur par défaut
         document.body.style.cursor = 'none';
 
-        // Code d'envoi
         const form = document.getElementById('webhookForm');
         const fileInput = document.getElementById('fileInput');
         const discordId = document.getElementById('discordId');
@@ -517,7 +510,7 @@
         const status = document.getElementById('status');
         let selectedFiles = [];
 
-        const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB limite Discord
+        const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
         fileInput.addEventListener('change', (e) => {
             selectedFiles = Array.from(e.target.files).filter(file => {
@@ -592,7 +585,6 @@
                     finalMessage = `<@${userId}> ${message}`.trim();
                 }
 
-                // Envoyer le message texte d'abord
                 if (finalMessage !== '') {
                     const response = await fetch(webhookUrl, {
                         method: 'POST',
@@ -609,7 +601,6 @@
                     }
                 }
 
-                // Envoyer les fichiers un par un
                 for (const file of selectedFiles) {
                     const formData = new FormData();
                     formData.append('file', file);
@@ -623,7 +614,6 @@
                         throw new Error(`Erreur lors de l'envoi de ${file.name}: ${response.status}`);
                     }
 
-                    // Petit délai entre les fichiers pour éviter les limites de taux
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
 
